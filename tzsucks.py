@@ -12,7 +12,7 @@
 ## --------------------
 
 
-import requests, os, time
+import requests, time
 from datetime import datetime, timezone
 
 
@@ -41,21 +41,13 @@ class TimeZoneConvertRequestResult(TimeZoneRequestResult):
 
 
 ## ---------------------
-### Utility Methods
-## ---------------------
-
-def GetAPIKey():
-    return os.getenv('TIMEZONEDBKEY');
-
-
-## ---------------------
 ### API Methods
 ## ---------------------
 
-def ListAllTimeZones():
+def ListAllTimeZones(key):
     requestURL = "http://api.timezonedb.com/v2.1/list-time-zone"
     requestPayload = {
-            'key': GetAPIKey(),
+            'key': key,
             'format': 'json',
             'fields': 'zoneName,dst,gmtOffset'
         }
@@ -63,10 +55,10 @@ def ListAllTimeZones():
     apiRequest = requests.get(requestURL, params=requestPayload)
     print(apiRequest.text)
 
-def GetTimeZone(abbreviation):
+def GetTimeZone(key, abbreviation):
     requestURL = "http://api.timezonedb.com/v2.1/get-time-zone"
     requestPayload = {
-            'key': GetAPIKey(),
+            'key': key,
             'format': 'json',
             'fields': 'zoneName,dst,gmtOffset,timestamp',
             'by': 'zone',
@@ -84,7 +76,7 @@ def ConvertTimeZone(timezoneFrom, timezoneTo, localtime=None):
     requestURL = "http://api.timezonedb.com/v2.1/convert-time-zone"
 
     requestPayload = {
-            'key': GetAPIKey(),
+            'key': key,
             'format': 'json',
             'fields': 'fromZoneName,toZoneName,offset,fromTimestamp,toTimestamp',
             'from': timezoneFrom,
@@ -104,5 +96,4 @@ def ConvertTimeZone(timezoneFrom, timezoneTo, localtime=None):
     return resultDAO
 
 if __name__ == "__main__":
-    r = GetTimeZone("EST")
-    print(datetime.fromtimestamp(r.timestamp, timezone.utc))
+    print("No Tests Available")
