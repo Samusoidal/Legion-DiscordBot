@@ -30,7 +30,7 @@ class ScriptDict():
             reader = csv.reader(csvfile, delimiter=',')
             rowCount = 0;
             for row in reader:
-                if len(row) > 2 and rowCount != 0:
+                if len(row) >= 2 and rowCount != 0:
                     self.Add(row[0], row[1])
                 rowCount += 1
 
@@ -45,7 +45,7 @@ class ScriptDict():
         if result:
             return result
         else:
-            return "ERROR - No script key found"
+            return "ERROR - No script key found for " + key
 
 
 if __name__ == "__main__":

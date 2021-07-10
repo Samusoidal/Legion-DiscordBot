@@ -6,7 +6,7 @@
 
 ### Public Commands
 
-**timezone** <zone>
+**timezone** \<zone>
 
 *aliases:* tz
 
