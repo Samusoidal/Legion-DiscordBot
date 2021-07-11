@@ -1,4 +1,4 @@
 __pycache__
 startup.sh
 *.db
-images/*.*
+data/images/*.*
