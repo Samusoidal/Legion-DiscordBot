@@ -12,11 +12,11 @@
 ## --------------------
 
 
-import os, requests, discord, time, calendar
+import os, requests, discord, time, calendar, sqlite3
 from discord.ext import commands
 from datetime import datetime
 
-import tzsucks, scriptdict
+import tzsucks, scriptdict, profiledb
 
 
 ## ---------------------
@@ -25,9 +25,10 @@ import tzsucks, scriptdict
 
 TOKEN = os.getenv("LEGIONBOTTOKEN")
 SCRIPTLOCATION = os.getenv("LEGIONBOTSCRIPTLOCATION")
+PROFILEDBNAME = os.getenv("LEGIONBOTPROFILEDBNAME")
+TZDB_KEY = os.getenv("TIMEZONEDBKEY")
 
-TZDB_KEY = os.getenv('TIMEZONEDBKEY');
-
+db = sqlite3.connect(PROFILEDBNAME)
 script = scriptdict.ScriptDict(SCRIPTLOCATION)
 
 intents = discord.Intents.default()
