@@ -7,7 +7,6 @@
 #
 # Requirements:
 # - requests
-# - timezonedb API key, stored as env var 'TIMEZONEDBKEY'
 #
 ## --------------------
 
@@ -15,6 +14,7 @@
 import requests, time
 from datetime import datetime, timezone
 
+TZDB_BASE_URL = "http://api.timezonedb.com/v2.1"
 
 ## ---------------------
 ### Data Access Objects
@@ -45,7 +45,7 @@ class TimeZoneConvertRequestResult(TimeZoneRequestResult):
 ## ---------------------
 
 def ListAllTimeZones(key):
-    requestURL = "http://api.timezonedb.com/v2.1/list-time-zone"
+    requestURL = TZDB_BASE_URL + "/list-time-zone"
     requestPayload = {
             'key': key,
             'format': 'json',
@@ -56,7 +56,7 @@ def ListAllTimeZones(key):
     print(apiRequest.text)
 
 def GetTimeZone(key, abbreviation):
-    requestURL = "http://api.timezonedb.com/v2.1/get-time-zone"
+    requestURL = TZDB_BASE_URL + "/get-time-zone"
     requestPayload = {
             'key': key,
             'format': 'json',
@@ -73,7 +73,7 @@ def GetTimeZone(key, abbreviation):
     return resultDAO
 
 def ConvertTimeZone(timezoneFrom, timezoneTo, localtime=None):
-    requestURL = "http://api.timezonedb.com/v2.1/convert-time-zone"
+    requestURL = TZDB_BASE_URL + "/convert-time-zone"
 
     requestPayload = {
             'key': key,

@@ -18,7 +18,7 @@ from datetime import datetime
 from PIL import Image, ImageFilter
 
 from modules import tzsucks, scriptdict, profiledb
-
+from modules.coverdb import gameboxdb
 
 ## ---------------------
 ### Bot Initialization
@@ -58,6 +58,53 @@ async def on_ready():
 async def status(ctx, *, status: str):
     await bot.change_presence(activity=discord.Game(name=status))
     await ctx.send(embed=discord.Embed(description=script.Get('COMMAND_STATUS_STATUSUPDATED')))
+
+
+## ---------------------
+### Misc Commands
+## ---------------------
+
+## << cover [name] >>
+## aliases: gc
+@bot.command(aliases=['gc'])
+async def cover(ctx, *, name: str):
+    
+    appid = os.getenv("TWITCHTVAPPID")
+    token = gameboxdb.GetOAuth2Token(appid, os.getenv("TWITCHTVAPPKEY"))
+
+    index = -1
+    query = name
+    try:
+        last = name.split(" ")[-1]
+        if last.startswith("(") and last.endswith(")"):
+            index = int(last[1:-1])-1
+            query = " ".join(name.split(" ")[:-1])
+        else:
+            raise ValueError
+    except ValueError:
+        pass
+
+    searchResults = gameboxdb.SearchGames(token, appid, query)
+
+    if len(searchResults) == 0:
+        await ctx.send(embed=discord.Embed(description=script.Get('COMMAND_GAMECOVER_NORESULTS')))
+    elif len(searchResults) > 1 and index == -1:
+        desc = ""
+        count = 0
+        for o in searchResults:
+            count += 1
+            desc += str(count) + ": " + o.name + "\n"
+        await ctx.send(embed=discord.Embed(title=script.Get('COMMAND_GAMECOVER_DIDYOUMEAN'), description=desc))
+    else:
+        coverResults = gameboxdb.GetGameCover(token, appid, searchResults[max(0,index)].id)
+        
+        gameName = coverResults.name
+        gameCover = coverResults.url
+
+        emb = discord.Embed(description=gameName)
+        emb.set_image(url=gameCover)
+
+        await ctx.send(embed=emb)
 
 
 ## ---------------------

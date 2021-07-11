@@ -1,3 +1,5 @@
 Key,Value
 SYSTEM_ONREADY,This unit is online.
 COMMAND_STATUS_STATUSUPDATED,Status has been updated.
+COMMAND_GAMECOVER_NORESULTS,No results found.
+COMMAND_GAMECOVER_DIDYOUMEAN,Did you mean…
