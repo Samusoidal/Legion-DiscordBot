@@ -12,11 +12,12 @@
 ## --------------------
 
 
-import os, requests, discord, time, calendar, sqlite3
+import os, requests, discord, time, calendar, sqlite3, shutil
 from discord.ext import commands
 from datetime import datetime
+from PIL import Image, ImageFilter
 
-import tzsucks, scriptdict, profiledb
+from modules import tzsucks, scriptdict, profiledb
 
 
 ## ---------------------
@@ -27,8 +28,15 @@ TOKEN = os.getenv("LEGIONBOTTOKEN")
 SCRIPTLOCATION = os.getenv("LEGIONBOTSCRIPTLOCATION")
 PROFILEDBNAME = os.getenv("LEGIONBOTPROFILEDBNAME")
 TZDB_KEY = os.getenv("TIMEZONEDBKEY")
+IMAGE_DIRECTORY = 'images/'
 
 db = sqlite3.connect(PROFILEDBNAME)
+profiledb.InitializeProfileDatabase(db, False)
+
+## Temporary
+ProfileXDimension = 800;
+ProfileYDimension = 400;
+
 script = scriptdict.ScriptDict(SCRIPTLOCATION)
 
 intents = discord.Intents.default()
@@ -47,7 +55,7 @@ async def on_ready():
 
 @bot.command()
 @commands.has_any_role("Honor Guard", "Tech Support")
-async def status(ctx, status: str):
+async def status(ctx, *, status: str):
     await bot.change_presence(activity=discord.Game(name=status))
     await ctx.send(embed=discord.Embed(description=script.Get('COMMAND_STATUS_STATUSUPDATED')))
 
@@ -80,7 +88,87 @@ async def timezoneconvert(ctx, inputTime: str,inputFromZoneAbbreviation: str, in
 
     await ctx.send(embed=replyEmbed)
 
+
+## ---------------------
+### Profile Commands
+## ---------------------
+
+## << profile >>
+## aliases: p
+@bot.command(aliases=['p'])
+async def profile(ctx, member: discord.Member=None):
+
+    if member is None:
+        member = ctx.author
+
+    userProfile = profiledb.ReadUser(db, uid=member.id)
+
+    if(userProfile == None):
+        profiledb.CreateUser(db, member.id)
+        userProfile = profiledb.ReadUser(db, uid=member.id)
+    
+    with open(IMAGE_DIRECTORY + userProfile.image, 'rb') as f:
+        picture = discord.File(f)
+        await ctx.send(file=picture)
+
+## << updateprofile >>
+## aliases: up
+@bot.command(aliases=['up'])
+async def updateprofile(ctx, key: str, *, value: str=None):
+
+    if value is None:
+        value = "N/A"
+
+    member = ctx.author
+
+    userProfile = profiledb.ReadUser(db, uid=member.id)
+
+    if(userProfile == None):
+        profiledb.CreateUser(db, member.id)
+        userProfile = profiledb.ReadUser(db, uid=member.id)
+    
+    if key == "pronouns":
+        userProfile.pronouns = value
+    elif key == "switch":
+        userProfile.switch = value
+    elif key == "psn" or key == "playstation":
+        userProfile.psn = value
+    elif key == "xbl" or key == "xbox":
+        userProfile.xbl = value
+    elif key == "battlenet" or key == "blizzard":
+        userProfile.battlenet = value
+    elif key == "image" or key == "background":
+        
+        if len(ctx.message.attachments) > 0:
+            imageURL = ctx.message.attachments[0]
+        else: imageURL = value
+
+        fileExtension = imageURL.split(".")[-1]
+        imageFilename = str(userProfile.discord_id) + "." + fileExtension
+
+        r = requests.get(imageURL, stream=True)
+        
+        if r.status_code == 200:
+            r.raw.decode_content = True
+            with open(IMAGE_DIRECTORY + imageFilename, 'wb') as f:
+                shutil.copyfileobj(r.raw, f)
+
+        CropImage(IMAGE_DIRECTORY + imageFilename, ProfileXDimension, ProfileYDimension)
+        BlurImage(IMAGE_DIRECTORY + imageFilename, 3)
+        userProfile.image = imageFilename
+
+    profiledb.UpdateUser(db, userProfile)
+
+def CropImage(filename, w, h):
+    im = Image.open(filename)
+    width, height = im.size
+    im1 = im.crop((0,0,800,400))
+    im1.save(filename)
+
+def BlurImage(filename, radius):
+    im = Image.open(filename)
+    im1 = im.filter(ImageFilter.GaussianBlur(radius=radius))
+    im1.save(filename)
+
+
 bot.run(TOKEN)
-
-
-

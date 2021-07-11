@@ -20,10 +20,13 @@ import sqlite3 as sl
 
 class Profile():
 
-    def __init__(self, id, discord_id, pronouns, switch, psn, xbl, battlenet, image):
+    def __init__(self, id, discord_id, tagline, fav_movie, fav_album, fav_game, switch, psn, xbl, battlenet, image):
         self.id = int(id)
         self.discord_id = int(discord_id)
-        self.pronouns = pronouns
+        self.tagline = tagline
+        self.fav_movie = fav_movie
+        self.fav_album = fav_album
+        self.fav_game = fav_game
         self.switch = switch
         self.psn = psn
         self.xbl = xbl
@@ -51,7 +54,10 @@ def InitializeProfileDatabase(con, force=False):
         CREATE TABLE USERS (
             id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
             discord_id LONG,
-            pronouns TEXT DEFAULT 'N/A',
+            tagline TEXT DEFAULT 'N/A',
+            fav_movie TEXT DEFAULT 'N/A',
+            fav_album TEXT DEFAULT 'N/A',
+            fav_game TEXT DEFAULT 'N/A',
             switch TEXT DEFAULT 'N/A',
             psn TEXT DEFAULT 'N/A',
             xbl TEXT DEFAULT 'N/A',
@@ -68,7 +74,7 @@ def CreateUser(con, uid):
     con.executemany(sqlInsertQuery, data)
     con.commit()
 
-def ReadUser(con, id=None, uid=None, pronouns=None, switch=None, psn=None, xbl=None, battlenet=None, image=None, limit=1):
+def ReadUser(con, id=None, uid=None, tagline=None, fav_movie=None, fav_album=None, fav_game=None, switch=None, psn=None, xbl=None, battlenet=None, image=None, limit=1):
     sqlReadQuery = "SELECT * FROM USERS WHERE"
     
     params = []
@@ -83,11 +89,29 @@ def ReadUser(con, id=None, uid=None, pronouns=None, switch=None, psn=None, xbl=N
         sqlReadQuery += " discord_id=?"
         params.append(uid)
     
-    if pronouns != None:
+    if tagline != None:
         if len(params) > 0:
             sqlReadQuery += " AND"
-        sqlReadQuery += " pronouns=?"
-        params.append(pronouns)
+        sqlReadQuery += " tagline=?"
+        params.append(tagline)
+
+    if fav_movie != None:
+        if len(params) > 0:
+            sqlReadQuery += " AND"
+        sqlReadQuery += " fav_movie=?"
+        params.append(fav_movie)
+
+    if fav_album != None:
+        if len(params) > 0:
+            sqlReadQuery += " AND"
+        sqlReadQuery += " fav_album=?"
+        params.append(fav_album)
+
+    if fav_game != None:
+        if len(params) > 0:
+            sqlReadQuery += " AND"
+        sqlReadQuery += " fav_game=?"
+        params.append(fav_game)
 
     if switch != None:
         if len(params) > 0:
@@ -130,7 +154,7 @@ def ReadUser(con, id=None, uid=None, pronouns=None, switch=None, psn=None, xbl=N
 
     for row in sqlQueryResults:
 
-        profile = Profile(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
+        profile = Profile(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10])
         if limit == 1:
             return profile
 
@@ -147,8 +171,8 @@ def ReadUser(con, id=None, uid=None, pronouns=None, switch=None, psn=None, xbl=N
 
 def UpdateUser(con, profile):
     
-    sqlUpdateQuery = "UPDATE USERS SET discord_id=?, pronouns=?, switch=?, psn=?, xbl=?, battlenet=?, image=? WHERE id=?"
-    data = (profile.discord_id, profile.pronouns, profile.switch, profile.psn, profile.xbl, profile.battlenet, profile.image, profile.id)
+    sqlUpdateQuery = "UPDATE USERS SET discord_id=?, tagline=?, fav_movie=?, fav_album=?, fav_game=?, switch=?, psn=?, xbl=?, battlenet=?, image=? WHERE id=?"
+    data = (profile.discord_id, profile.tagline, profile.fav_movie, profile.fav_album, profile.fav_game, profile.switch, profile.psn, profile.xbl, profile.battlenet, profile.image, profile.id)
     con.execute(sqlUpdateQuery, data)
     con.commit()
 
